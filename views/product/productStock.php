@@ -1,0 +1,99 @@
+<?php
+/* View to review the stock informations about a certain product.
+ * @author Andrea Morales
+ * */
+?>
+
+
+<?php if (isset($params["message"])): ?>
+    <div class='alert alert-warning'>
+    <strong><?php echo $params["message"]; ?></strong>
+    </div>
+<?php endif; ?>
+
+<!-- ------------------------------------------------------------ PRODUCT SEARCH ---------------------------------------------------------- -->
+
+<div class='container'>
+<h2>Stock</h2>
+<?php if (isset($_SESSION['name'])): ?>
+    <p style='font-weight: bold;font-style: oblique;'><?php echo "User logged:  ".$_SESSION['name']." ".$_SESSION['surname'] ?></p>
+<?php endif ?>
+
+<form method="post">
+<div class="row g-3 align-items-center">
+  <span class="col-auto">
+    <label for="search" class="col-form-label">Product code to search</label>
+  </span>
+  <span class="col-auto">
+  <input type="text" id="search" name="search" class="form-control" aria-describedby="searchHelpInline" ?>
+  </span>
+  <span class="col-auto">
+    <button class="btn btn-primary" type="submit" name="action" value="product/searchCode">Search</button>
+  </span>
+</div>
+</form>
+<br>
+
+<!-- ------------------------------------------------------------ PRODUCT INFO ---------------------------------------------------------- -->
+
+<?php
+require_once "lib/Renderer.php";
+require_once "model/Product.php";
+
+use proven\store\model\Product;
+
+echo "<h4>Product details</h4>";
+
+$message = $params["message"] ?? "";
+
+$product = $params["product"] ?? new Product();
+
+echo "<div>";
+echo proven\lib\views\Renderer::renderProductInfos($product);
+echo "</div>";
+?>
+
+<!-- -------------------------------------------------------------- STOCK TABLE ---------------------------------------------------------- -->
+
+<?php
+// Display warehouses and their informations in a table.
+$warehouses = $params["warehouses"] ?? null;
+$PSFields = $params["productStockRegisters"] ?? null;
+$tableData = $params["tableData"] ?? null;
+
+if (isset($warehouses) && isset($PSFields)) {
+    echo <<<EOT
+        <br>
+        <table class="table table-sm table-bordered table-striped table-hover caption-top table-responsive-sm">
+        <h4>Stock information</h4>
+        <thead class='table-dark'>
+        <tr>
+            <th>ID</th>
+            <th>Code</th>
+            <th>Address</th>
+            <th>Stock</th>
+        </tr>
+        </thead>
+        <tbody>
+        EOT;
+    // $params contains variables passed in from the controller.
+    foreach ($tableData as $register) {
+        echo <<<EOT
+            <tr>
+                <td> <!-- <a href="index.php?action=user/edit&id={$register["id"]}">-->{$register["id"]}<!-- </a> --> </td>
+                <td>{$register["code"]}</td>
+                <td>{$register["address"]}</td>
+                <td>{$register["stock"]}</td>
+            </tr>               
+            EOT;
+    }
+    echo "</tbody>";
+    echo "</table>";
+    echo "</div>";
+} else {
+    echo '<p style="font-weight: bold;font-style: oblique;" class="text-danger display-6">We not have this product in any warehouse</p>';
+    echo "</div>";
+}
+
+
+?>
